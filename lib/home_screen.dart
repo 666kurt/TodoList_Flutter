@@ -1,6 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo_flutter/bloc/todo_bloc.dart';
+import 'package:todo_flutter/bloc/todo_event.dart';
+import 'package:todo_flutter/bloc/todo_state.dart';
+import 'package:todo_flutter/todo.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -32,7 +38,17 @@ class HomeScreen extends StatelessWidget {
             ),
             // Button
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                final String title =
+                    _controller.text; // забираем текст из контроллера
+                final int id = Random().nextInt(
+                    10000); // генерируем случайное целое в диапазоне от 0 до 10000 для айди
+                final Todo newTodo = Todo(id: id, title: title);
+                if (title.isNotEmpty) {
+                  context.read<TodoBloc>().add(AddTodoEvent(todo: newTodo));
+                  _controller.clear();
+                }
+              },
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 16),
                 padding: const EdgeInsets.all(10),
@@ -54,21 +70,40 @@ class HomeScreen extends StatelessWidget {
             const Divider(),
             // List
             Expanded(
-              child: ListView.builder(
-                itemCount: 20,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: const Text(
-                      "Sample title",
-                      style: TextStyle(
-                        color: Colors.white,
+              child: BlocBuilder<TodoBloc, CurrentTodoState>(
+                builder: (context, state) {
+                  final List<Todo> todos = state.todos;
+                  if (todos.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "Todo list is empty!",
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    leading: Checkbox(
-                      value: true,
-                      onChanged: (value) {},
-                    ),
-                  );
+                    );
+                  } else {
+                    return ListView.builder(
+                      itemCount: todos.length,
+                      itemBuilder: (context, index) {
+                        final Todo todo = todos[index];
+                        return ListTile(
+                          title: Text(
+                            todo.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          leading: Checkbox(
+                            value: todo.isCompleted,
+                            onChanged: (value) {
+                              context
+                                  .read<TodoBloc>()
+                                  .add(ToggleStatusEvent(id: todo.id));
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  }
                 },
               ),
             )

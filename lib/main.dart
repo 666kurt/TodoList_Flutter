@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo_flutter/bloc/todo_bloc.dart';
 import 'home_screen.dart';
 
 void main() {
@@ -25,7 +27,10 @@ class TodoList extends StatelessWidget {
           ),
         ),
       ),
-      home: HomeScreen(),
+      home: BlocProvider(
+        create: (_) => TodoBloc(),
+        child: HomeScreen(),
+      ),
     );
   }
 }
