@@ -100,6 +100,14 @@ class HomeScreen extends StatelessWidget {
                                   .add(ToggleStatusEvent(id: todo.id));
                             },
                           ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              context
+                                  .read<TodoBloc>()
+                                  .add(DeleteTodoEvent(id: todo.id));
+                            },
+                          ),
                         );
                       },
                     );
